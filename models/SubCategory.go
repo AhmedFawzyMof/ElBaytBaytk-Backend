@@ -34,7 +34,7 @@ func (s SubCategory) GetHomeSubCategory(db *sql.DB) ([]SubCategory, error) {
 			fmt.Println(err.Error())
 			return nil, fmt.Errorf("error while prossing subcategories")
 		}
-		SubCategory.Img = "http://localhost:5500/assets" + SubCategory.Img
+		SubCategory.Img = "https://elbaytbaytk-backend.onrender.com/assets" + SubCategory.Img
 		SubCategories = append(SubCategories, SubCategory)
 	}
 
@@ -56,7 +56,7 @@ func (s SubCategory) GetAllSubCategory(db *sql.DB) ([]SubCategory, error) {
 		if err := rows.Scan(&SubCategory.Id, &SubCategory.Name, &SubCategory.NameAr, &SubCategory.CategoryId, &SubCategory.CategoryName, &SubCategory.CategoryNameAr, &SubCategory.Img); err != nil {
 			return nil, fmt.Errorf("error while prossing subcategories")
 		}
-		SubCategory.Img = "http://localhost:5500/assets" + SubCategory.Img
+		SubCategory.Img = "https://elbaytbaytk-backend.onrender.com/assets" + SubCategory.Img
 		SubCategories = append(SubCategories, SubCategory)
 	}
 
@@ -81,7 +81,7 @@ func (s SubCategory) GetSubCategoryByCategory(db *sql.DB, categoryId int) ([]Sub
 		if err := rows.Scan(&SubCategory.Id, &SubCategory.Name, &SubCategory.NameAr, &SubCategory.CategoryId, &SubCategory.Img); err != nil {
 			return nil, errors.New("error while prossing subcategories")
 		}
-		SubCategory.Img = "http://localhost:5500/assets" + SubCategory.Img
+		SubCategory.Img = "https://elbaytbaytk-backend.onrender.com/assets" + SubCategory.Img
 		SubCategories = append(SubCategories, SubCategory)
 	}
 
@@ -97,7 +97,7 @@ func (s SubCategory) GetSubCategoryById(db *sql.DB, id int) (SubCategory, error)
 		return SubCategory{}, errors.New("error while prossing subcategories")
 	}
 
-	subCategory.Img = "http://localhost:5500/assets" + subCategory.Img
+	subCategory.Img = "https://elbaytbaytk-backend.onrender.com/assets" + subCategory.Img
 
 	return subCategory, nil
 }
