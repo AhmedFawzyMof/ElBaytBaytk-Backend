@@ -15,7 +15,6 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusForbidden)
 		return
 	}
-	res.WriteHeader(http.StatusOK)
 
 	db := database.Connect()
 	defer db.Close()
@@ -36,6 +35,8 @@ func Login(res http.ResponseWriter, req *http.Request) {
 
 	Response := map[string]interface{}{"token": Token}
 
+	res.WriteHeader(http.StatusOK)
+
 	if err := json.NewEncoder(res).Encode(Response); err != nil {
 		middleware.SendError(err, res)
 		return
@@ -49,7 +50,6 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusForbidden)
 		return
 	}
-	res.WriteHeader(http.StatusOK)
 
 	db := database.Connect()
 	defer db.Close()
@@ -69,7 +69,8 @@ func Register(res http.ResponseWriter, req *http.Request) {
 	}
 
 	Response := map[string]interface{}{"token": Token}
-
+	
+	res.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(res).Encode(Response); err != nil {
 		middleware.SendError(err, res)
 		return
@@ -98,11 +99,6 @@ func Favourite(res http.ResponseWriter, req *http.Request) {
 
 	favourite := models.Favourite{}
 
-	// if err := json.NewDecoder(req.Body).Decode(&favourite); err != nil {
-	// 	middleware.SendError(err, res)
-	// 	return
-	// }
-
 	favourite.User = user
 
 	Products, err := favourite.GetAllFavourite(db)
@@ -120,11 +116,6 @@ func Favourite(res http.ResponseWriter, req *http.Request) {
 		middleware.SendError(err, res)
 		return
 	}
-
-	// if err := favourite.AddToFavourite(db); err != nil {
-	// 	middleware.SendError(err, res)
-	// 	return
-	// }
 }
 
 func AddToFavourite(res http.ResponseWriter, req *http.Request) {
