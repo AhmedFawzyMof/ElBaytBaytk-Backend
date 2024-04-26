@@ -39,7 +39,7 @@ func (p Product) GetAllProduct(db *sql.DB, limit int) ([]Product, error) {
 
 	const stableLimit = 20
 
-	productsPre, err := db.Prepare("SELECT Products.id, Products.name, Products.category, Products.nameAr, Products.description, Products.descriptionAr, Products.price, Products.discount, ProductImages.image FROM Products INNER JOIN ProductImages ON Products.id = ProductImages.product WHERE Products.discount > 0  GROUP BY Products.id ORDER BY Products.discount DESC LIMIT ?,?")
+	productsPre, err := db.Prepare("SELECT Products.id, Products.name, Products.category, Products.nameAr, Products.description, Products.descriptionAr, Products.price, Products.discount, ProductImages.image FROM Products INNER JOIN ProductImages ON Products.id = ProductImages.product GROUP BY Products.id ORDER BY Products.discount DESC LIMIT ?,?")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -148,25 +148,54 @@ func (p Product) ProductsBySubCategorys(db *sql.DB, id, limit int) ([]Product, e
 	return Products, nil
 }
 
-func (p Product) ProductById(db *sql.DB, id int) (Product, error) {
-	var product Product
+func (p Product) ProductById(db *sql.DB, id int) (map[int]map[string]interface{}, error) {
+	ProductMap := make(map[int]map[string]interface{})
 
 	preprow, err := db.Prepare("SELECT Products.id, Products.name, Products.nameAr, Products.description, Products.descriptionAr, Products.price, Products.discount, Products.warranty, Products.brand, Products.material, ProductImages.image, ProductImages.color FROM Products INNER JOIN ProductImages ON Products.id = ProductImages.product WHERE Products.id = ?")
 
 	if err != nil {
-		return Product{}, errors.New("error while prossing product")
+		return nil, errors.New("error while prossing product")
 	}
 
-	row := preprow.QueryRow(id)
+	rows, err := preprow.Query(id)
 
-	if err := row.Scan(&product.Id, &product.Name, &product.NameAr, &product.Description, &product.DescriptionAr, &product.Price, &product.Discount, &product.Warranty, &product.Brand, &product.Material, &product.Image, &product.Color); err != nil {
-		fmt.Println(err.Error())
-		return Product{}, errors.New("error while prossing product")
+	if err != nil {
+		return nil, errors.New("error while prossing product")
 	}
 
-	product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + product.Image
+	defer rows.Close()
 
-	return product, nil
+	for rows.Next() {
+		var product Product
+
+		if err := rows.Scan(&product.Id, &product.Name, &product.NameAr, &product.Description, &product.DescriptionAr, &product.Price, &product.Discount, &product.Warranty, &product.Brand, &product.Material, &product.Image, &product.Color); err != nil {
+			fmt.Println(err.Error())
+			return nil, errors.New("error while prossing product")
+		}
+
+		product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + product.Image
+
+		if _, ok := ProductMap[product.Id]; !ok {
+			ProductMap[product.Id] = map[string]interface{}{
+				"id":            product.Id,
+				"name":          product.Name,
+				"nameAr":        product.NameAr,
+				"description":   product.Description,
+				"descriptionAr": product.DescriptionAr,
+				"price":         product.Price,
+				"discount":      product.Discount,
+				"warranty":      product.Warranty,
+				"brand":         product.Brand,
+				"material":      product.Material,
+				"images":        []map[string]string{},
+				"colors":        []sql.NullString{},
+			}
+		}
+		ProductMap[product.Id]["images"] = append(ProductMap[product.Id]["images"].([]map[string]string), map[string]string{"image": product.Image})
+		ProductMap[product.Id]["colors"] = append(ProductMap[product.Id]["colors"].([]sql.NullString), product.Color)
+	}
+
+	return ProductMap, nil
 }
 
 func (p Product) ProductByOffer(db *sql.DB, subcategory, limit int) ([]Product, error) {
