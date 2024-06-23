@@ -24,7 +24,8 @@ func (s *Server) Start() error {
 
 	mux.HandleFunc("GET /api/home", routes.Home)
 	mux.HandleFunc("GET /api/allproducts/{limit}", routes.AllProducts)
-	mux.HandleFunc("GET /api/categories", routes.Categories)
+	mux.HandleFunc("GET /api/categories", routes.Category)
+	mux.HandleFunc("GET /api/allcategories", routes.Categories)
 	mux.HandleFunc("GET /api/category/{id}/{limit}", routes.CategoryPage)
 	mux.HandleFunc("GET /api/subcategory/{id}/{limit}", routes.SubCategoryByid)
 	mux.HandleFunc("GET /api/offer/{subcategory}/{limit}", routes.ProductByOffer)

@@ -10,9 +10,7 @@ import (
 	"strconv"
 )
 
-func Categories(res http.ResponseWriter, req *http.Request) {
-	res.WriteHeader(http.StatusOK)
-
+func Category(res http.ResponseWriter, req *http.Request) {
 	db := database.Connect()
 	defer db.Close()
 
@@ -26,6 +24,31 @@ func Categories(res http.ResponseWriter, req *http.Request) {
 
 	Response := make(map[string]interface{})
 	Response["SubCategories"] = SubCategories
+
+	res.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(res).Encode(Response); err != nil {
+		middleware.SendError(err, res)
+		return
+	}
+}
+
+func Categories(res http.ResponseWriter, req *http.Request) {
+	db := database.Connect()
+	defer db.Close()
+
+	category := models.Category{}
+	Categories, err := category.GetAllCategories(db)
+
+	if err != nil {
+		middleware.SendError(err, res)
+		return
+	}
+
+	Response := make(map[string]interface{})
+	Response["Categories"] = Categories
+
+	res.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(res).Encode(Response); err != nil {
 		middleware.SendError(err, res)

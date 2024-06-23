@@ -41,7 +41,11 @@ func ProductByOffer(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(res).Encode(Products); err != nil {
+	Response := map[string]interface{} {
+		"Products": Products,
+	}
+
+	if err := json.NewEncoder(res).Encode(Response); err != nil {
 		middleware.SendError(err, res)
 		return
 	}

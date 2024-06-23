@@ -16,7 +16,6 @@ type OrderItem struct {
 	Color        string  `json:"color"`
 	ProductName  string  `json:"name"`
 	ProductPrice float64 `json:"price"`
-	ProductSlug  string  `json:"slug"`
 }
 
 type Order struct {
@@ -35,10 +34,7 @@ type Order struct {
 	CreatedAt   time.Time   `json:"created_at"`
 }
 
-type OrdersS []Order
-
 func (o Order) Create(db *sql.DB) (string, error) {
-
 	o.Id = uuid.New().String()
 
 	_, err := db.Exec("INSERT INTO Orders(id, user, name, method, phone, spare_phone, address, isPaid, isDelivered, order_status, created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)", o.Id, o.User, o.Name, o.Method, o.Phone, o.SparePhone, o.Address, o.IsPaid, o.IsDelivered, "pending", o.CreatedAt)
@@ -53,10 +49,12 @@ func (o Order) Create(db *sql.DB) (string, error) {
 		return "", fmt.Errorf("error occurred while processing the order please try again or contact us")
 	}
 
-	for _, item := range o.OrderItems {
+	for i, item := range o.OrderItems {
+		fmt.Printf("Processing item %d: %+v\n", i, item)
 		_, err := items.Exec(o.Id, item.Product, item.Quantity, item.Color)
 
 		if err != nil {
+			fmt.Printf("Error processing item %d: %v\n", i, err)
 			return "", fmt.Errorf("error occurred while processing the order please try again or contact us")
 		}
 	}
@@ -70,51 +68,49 @@ func (o Order) GetHistory(db *sql.DB) ([]Order, error) {
 
 	var Orders []Order
 
-	orders, err := db.Query("SELECT * FROM Orders WHERE Orders.user = ?", o.User)
+	stmt, err := db.Prepare("SELECT Orders.id, Orders.name, Orders.address, Orders.phone, Orders.spare_phone, Orders.method, Orders.order_status, Orders.isPaid, Orders.isDelivered, Orders.created_at, OrdersItem.color, OrdersItem.quantity, Products.name, Products.price FROM Orders INNER JOIN OrdersItem ON OrdersItem.`order` = Orders.id INNER JOIN Products ON Products.id = OrdersItem.product WHERE Orders.user = ?")
+
 	if err != nil {
-		return nil, fmt.Errorf("error occurred while processing the order please try again or contact us")
+		fmt.Println(err.Error())
+		return nil, err
 	}
 
-	defer orders.Close()
+	defer stmt.Close()
 
-	for orders.Next() {
+	rows, err := stmt.Query(o.User)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
 		var Order Order
+		var Item OrderItem
 
-		if err := orders.Scan(&Order.Id, &Order.User, &Order.Name, &Order.Method, &Order.Phone, &Order.SparePhone, &Order.Address, &Order.IsPaid, &Order.IsDelivered, &Order.OrderStatus, &Order.CreatedAt); err != nil {
+		if err := rows.Scan(&Order.Id, &Order.Name, &Order.Address, &Order.Phone, &Order.SparePhone, &Order.Method, &Order.OrderStatus, &Order.IsPaid, &Order.IsDelivered, &Order.CreatedAt, &Item.Color, &Item.Quantity, &Item.ProductName, &Item.ProductPrice); err != nil {
+			fmt.Println(err.Error())
 			return nil, fmt.Errorf("error occurred while processing the order please try again or contact us")
 		}
 
-		Orders = append(Orders, Order)
+		index, found := FindOrderById(Orders, Order.Id)
+
+		if found {
+			Orders[index].OrderItems = append(Orders[index].OrderItems, Item)
+		} else {
+			Order.OrderItems = append(Order.OrderItems, Item)
+			Orders = append(Orders, Order)
+		}
 	}
 
 	return Orders, nil
 }
 
-func (o *OrdersS) GetOrderProducts(db *sql.DB) error {
-
-	productsPre, err := db.Prepare("SELECT OrdersItem.`order`, OrdersItem.quantity, Products.name, Products.price FROM OrdersItem INNER JOIN Products ON OrdersItem.product = Products.id WHERE OrdersItem.`order` = ?")
-
-	if err != nil {
-		return fmt.Errorf("error occurred while processing the order please try again or contact us")
-	}
-	for i := range *o {
-
-		products, err := productsPre.Query((*o)[i].Id)
-
-		if err != nil {
-			return fmt.Errorf("error occurred while processing the order please try again or contact us")
-		}
-
-		defer products.Close()
-
-		for products.Next() {
-			var OrderItem OrderItem
-
-			if err := products.Scan(&OrderItem.Order, &OrderItem.Quantity, &OrderItem.ProductName, &OrderItem.ProductPrice); err != nil {
-				return fmt.Errorf("error occurred while processing the order please try again or contact us")
-			}
-			(*o)[i].OrderItems = append((*o)[i].OrderItems, OrderItem)
+func FindOrderById(orders []Order, id string) (int, bool) {
+	for i, order := range orders {
+		if order.Id == id {
+			return i, true
 		}
 	}
-	return nil
+	return -1, false
 }

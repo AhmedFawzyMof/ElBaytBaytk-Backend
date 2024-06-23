@@ -85,15 +85,8 @@ func OrderHistory(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	Order := models.OrdersS(Orders)
-
-	if err := Order.GetOrderProducts(db); err != nil {
-		middleware.SendError(err, res)
-		return
-	}
-
 	Response := map[string]interface{}{
-		"Orders": Order,
+		"Orders": Orders,
 	}
 
 	if err := json.NewEncoder(res).Encode(Response); err != nil {
