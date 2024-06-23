@@ -31,7 +31,7 @@ func (o Offers) GetAllOffers(db *sql.DB) ([]Offers, error) {
 			return nil, fmt.Errorf("error while prossing offers")
 		}
 
-		offer.Img = "http://localhost:5500/assets" + offer.Img
+		offer.Img = "https://elbaytbaytk-backend.onrender.com/assets" + offer.Img
 
 		TOffers = append(TOffers, offer)
 	}
