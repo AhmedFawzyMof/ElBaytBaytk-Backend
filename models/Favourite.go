@@ -32,7 +32,7 @@ func (f Favourite) GetAllFavourite(db *sql.DB) ([]Product, error) {
 			return nil, errors.New("error while prossing products")
 		}
 
-		Product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + Product.Image
+		Product.Image = "http://localhost:5500/assets" + Product.Image
 		Products = append(Products, Product)
 	}
 

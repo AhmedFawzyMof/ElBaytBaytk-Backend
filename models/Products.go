@@ -64,7 +64,7 @@ func (p Product) GetAllProduct(db *sql.DB, limit int) ([]Product, error) {
 			return nil, errors.New("error while prossing products")
 		}
 
-		Product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + Product.Image
+		Product.Image = "http://localhost:5500/assets" + Product.Image
 		Products = append(Products, Product)
 	}
 
@@ -103,7 +103,7 @@ func (p Product) ProductsByCategorys(db *sql.DB, id, limit int) ([]Product, erro
 			return nil, errors.New("error while prossing products")
 		}
 
-		Product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + Product.Image
+		Product.Image = "http://localhost:5500/assets" + Product.Image
 		Products = append(Products, Product)
 	}
 
@@ -141,7 +141,7 @@ func (p Product) ProductsBySubCategorys(db *sql.DB, id, limit int) ([]Product, e
 			return nil, errors.New("error while prossing products")
 		}
 
-		Product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + Product.Image
+		Product.Image = "http://localhost:5500/assets" + Product.Image
 		Products = append(Products, Product)
 	}
 
@@ -173,7 +173,7 @@ func (p Product) ProductById(db *sql.DB, id int) (map[int]map[string]interface{}
 			return nil, errors.New("error while prossing product")
 		}
 
-		product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + product.Image
+		product.Image = "http://localhost:5500/assets" + product.Image
 
 		if _, ok := ProductMap[product.Id]; !ok {
 			ProductMap[product.Id] = map[string]interface{}{
@@ -233,7 +233,7 @@ func (p Product) ProductByOffer(db *sql.DB, subcategory, limit int) ([]Product, 
 			return nil, errors.New("error while prossing products")
 		}
 
-		Product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + Product.Image
+		Product.Image = "http://localhost:5500/assets" + Product.Image
 		Products = append(Products, Product)
 	}
 
@@ -270,7 +270,7 @@ func (p Product) ProductsBySearch(db *sql.DB, search string, limit int) ([]Produ
 			return nil, fmt.Errorf("error while prossing products")
 		}
 
-		Product.Image = "https://elbaytbaytk-backend.onrender.com/assets" + Product.Image
+		Product.Image = "http://localhost:5500/assets" + Product.Image
 
 		Products = append(Products, Product)
 	}
