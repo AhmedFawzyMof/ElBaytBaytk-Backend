@@ -31,7 +31,7 @@ func (c Carousel) GetHomeCarousel(db *sql.DB) ([]Carousel, error) {
 			return nil, fmt.Errorf("error while prossing Carousel images")
 		}
 
-		carousele.Img = "http://localhost:5500/assets" + carousele.Img
+		carousele.Img = "https://elbaytbaytk-backend.onrender.com/assets" + carousele.Img
 		carousel = append(carousel, carousele)
 	}
 
